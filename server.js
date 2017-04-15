@@ -49,7 +49,7 @@ app.get('/signUpMediaOwner', function(req,res){
 // POST Request - Signup for the Client
 app.post('/signUpMediaOwner', function(req,res){
 	var mediaLogo = '/logo/'
-	var resigter = {"TimeStamp": new Date(),"mediaName":req.body.mediaName, "phoneNumber":req.body.phoneNumber, "emailAddress":req.body.emailAddress, "address":req.body.address, "username":req.body.username, "password":req.body.password, "mediaLogo":req.body.mediaLogo}
+	var register = {"TimeStamp": new Date(),"mediaName":req.body.mediaName, "phoneNumber":req.body.phoneNumber, "emailAddress":req.body.emailAddress, "address":req.body.address, "username":req.body.username, "password":req.body.password, "mediaLogo":req.body.mediaLogo}
 	db.collection('mediaOwners').insert(register, {w:1}, function(err,result){
 		res.redirect('/')
 	})
