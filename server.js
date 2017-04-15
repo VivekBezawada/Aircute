@@ -87,7 +87,7 @@ app.get('/signinUser', function(req,res){
 })
 
 //POST Request - Login Media Owner
-app.post('/signinMediaOwner', function(req,res){
+app.post('/signinUser', function(req,res){
 	db.collection('users').find({$and: [{"userName":userName}, {"password":password}]}).count(function(err, count){
 		if(count == 1) {
 				res.send("YOU ARE NOW LOGGED IN AS A USER")
