@@ -75,9 +75,10 @@ app.get('/signinMediaOwner', function(req,res){
 
 //POST Request - Login Media Owner
 app.post('/signinMediaOwner', function(req,res){
-	db.collection('mediaOwners').find({$and: [{"userName":req.body.username}, {"password":req.body.password}]}).count(function(err, count){
+
+	db.collection('mediaOwners').find({$and: [{"username":req.body.username}, {"password":req.body.password}]}).count(function(err, count){
 		if(count == 1) {
-				res.send("YOU ARE NOW LOGGED IN AS " + req.body.username)
+				res.send("YOU ARE NOW LOGGED IN AS " + req.body.username + ". Please come back later for the admin panel")
 			}
 	})
 })
