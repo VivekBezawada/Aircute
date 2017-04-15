@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='/css/bootstrap.min.css'/>
+    <link rel='stylesheet' href='/css/style.css'/>
+    <link rel='stylesheet' href='/css/signup.css'/>
+  </head>
+  <body>
+    <div class="container-fluid signup-background">
+        <div class="logo-inplace text-center">
+          <img src="/images/logo.png">
+          <h4 class="title"> Create your acount </h4>
+        </div>
+        <div class="signup">
+          <div class="row">
+            <div class="col-xs-7">
+              <form action="/signUpMediaOwner" method="POST">
+              <h5> Users</h5>
+                <div class="form-group">
+                  <input type="email" class="form-control" name="emailAddress" placeholder="Email Address">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" name="username" placeholder="Username">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" name="password" placeholder="Password">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" name="confirmPassword" placeholder="Confirm Password">
+                </div>
+                
+            </div>
+            <div class="col-xs-5">
+                
+            </div>
+          </div>
+          <p> By Clicking Create Account, you acknowledge you have read and agreed to our <a href="/terms">Terms of Use</a> and <a href="/privacyPolicy">Privacy Policy</a></p>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+              </form>
+            <hr>
+            
+            <div class="text-center">
+                <h4>Already have an account ?</h4>
+                <button onclick="location.href='/signinUser'" type="button" class="btn btn-default">Sign in</button>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>

@@ -27,56 +27,90 @@ app.listen(80,function(){
 	});
 })
 
-
+//0. HomePage
 
 app.get('/', function(req,res){
-	res.send("HOMEPAGE");
-	//res.render('main', { layout:'layouts/admin', title: 'Express'});
+	res.render('homepage', { layout:'layouts/admin', title: 'Home Page | Aircute'});
+})
+
+//0. Enf of HomePage
+
+//1. Authentication
+
+app.get('/signup', function(req,res){
+	res.render('signup', { layout:null, title: 'Signup | Aircute'});
 })
 
 //GET Request - Signup for the Client
 app.get('/signUpMediaOwner', function(req,res){
-	res.render('signup', { layout:null, title: 'Signup | Aircute'});
+	res.render('signupMedia', { layout:null, title: 'Signup Media Owners | Aircute'});
 })
 
 // POST Request - Signup for the Client
 app.post('/signUpMediaOwner', function(req,res){
-	/*
-	var mediaName
-	phoneNumber
-	emailAddress
-	Address
-	username
-	password
-	confirmPassword
-	mediaLogo
-	*/
+	var mediaLogo = '/logo/'
+	var resigter = {"TimeStamp": new Date(),"mediaName":req.body.mediaName, "phoneNumber":req.body.phoneNumber, "emailAddress":req.body.emailAddress, "address":req.body.address, "username":req.body.username, "password":req.body.password, "mediaLogo":req.body.mediaLogo}
+	db.collection('mediaOwners').insert(register, {w:1}, function(err,result){
+		res.redirect('/')
+	})
 })
 
 //GET Request - Signup User
 app.get('/signUpUser', function(req,res){
-	res.render('signup', { layout:null, title: 'Signup | Aircute'});
+	res.render('signupuser', { layout:null, title: 'Signup | Aircute'});
 })
 
 //POST Request - Signup User
 app.post('/signUpUser', function(req,res){
-	/*
-	var username
-	password
-	emailAddress
-	*/
+	var register = {"TimeStamp": new Date(),"username":req.body.username, "password":req.body.password, "emailAddress":req.body.emailAddress}
+	db.collection('users').insert(register, {w:1}, function(err,result){
+		res.redirect('/')
+	})
 })
 
 // GET Request - Login Media owner
 app.get('/signinMediaOwner', function(req,res){
-	res.render('signin', { layout:null, title: 'Signin | Aircute'});
+	res.render('signinMediaOwner', { layout:null, title: 'Signin as a Media Owner | Aircute'});
 })
 
 //POST Request - Login Media Owner
 app.post('/signinMediaOwner', function(req,res){
-	/*
-	var username
-	password
-	*/
+	db.collection('mediaOwners').find({$and: [{"userName":userName}, {"password":password}]}).count(function(err, count){
+		if(count == 1) {
+				res.send("YOU ARE NOW LOGGED IN AS MEDIA OWNER")
+			}
+	})
 })
 
+app.get('/signinUser', function(req,res){
+	res.render('signinUser', { layout:null, title: 'Signin as a User | Aircute'});
+})
+
+//POST Request - Login Media Owner
+app.post('/signinMediaOwner', function(req,res){
+	db.collection('users').find({$and: [{"userName":userName}, {"password":password}]}).count(function(err, count){
+		if(count == 1) {
+				res.send("YOU ARE NOW LOGGED IN AS A USER")
+			}
+	})
+})
+//1. End of Authentication
+
+// 2. Listing and Detail Pages
+
+app.get('/listing', function(req,res){
+	var passData
+	passData.layout = 'layouts/admin'
+	passData.title =  'Listing | Aircute'
+	db.collection('listings').find().toArray(function(err, result){
+
+	})
+	// some db operation to get the results
+})
+
+app.get('/listing/:id', function(req,res){
+	// id is a title
+	res.send("DETAILS PAGE")
+})
+
+// Single listing

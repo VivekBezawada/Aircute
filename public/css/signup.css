@@ -2,3 +2,35 @@
 	background-image: url("/images/background.JPG");
 	height: 50vh;
 }
+
+.signup {
+	width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5vh;
+    margin-bottom: 10vh;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 1px 1px 5px #888888;
+}
+
+.signin {
+    width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5vh;
+    margin-bottom: 10vh;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 1px 1px 5px #888888;
+}
+
+.logo-inplace {
+	margin-top: 20vh;
+}
+
+.title {
+    color: #fff;
+}
