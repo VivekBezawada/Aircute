@@ -99,12 +99,15 @@ app.post('/signinMediaOwner', function(req,res){
 // 2. Listing and Detail Pages
 
 app.get('/listing', function(req,res){
-	var passData
+	var passData = {}
 	passData.layout = 'layouts/admin'
 	passData.title =  'Listing | Aircute'
-	db.collection('listings').find().toArray(function(err, result){
+	
+	//db.collection('listings').find().toArray(function(err, result){
 
-	})
+	//})
+
+	res.render('listings', passData)
 	// some db operation to get the results
 })
 
