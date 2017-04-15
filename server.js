@@ -57,7 +57,7 @@ app.post('/signUpMediaOwner', function(req,res){
 
 //GET Request - Signup User
 app.get('/signUpUser', function(req,res){
-	res.render('signupuser', { layout:null, title: 'Signup | Aircute'});
+	res.render('signupUser', { layout:null, title: 'Signup | Aircute'});
 })
 
 //POST Request - Signup User
