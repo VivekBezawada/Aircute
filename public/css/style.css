@@ -1,26 +1,34 @@
-/* Scroll Style Change 
-
-body::-webkit-scrollbar-track
-{
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	background-color: #F5F5F5;
-}
-
-body::-webkit-scrollbar
-{
-	width: 10px;
-	background-color: #F5F5F5;
-}
-
-body::-webkit-scrollbar-thumb
-{
-	background-color: #000000;
-	border: 2px solid #555555;
-}
-
-*/
-
 footer {
 	background-color: #000;
 	color:#fff;
+}
+
+#admin li a {
+	text-transform: uppercase;
+}
+
+.navbar-default {
+	background-color :#3b3737 !important;
+	height:15vh;
+}
+
+.nav-admin a{
+	color:#fff !important;
+	font-weight: 300 !important;
+	font-size:1.2em;
+	padding-top:0px !important;
+	padding-bottom:0px !important;
+}
+
+.nav-admin span {
+	color: #c70065;
+	font-size:1.2em;
+}
+
+.tab-content {
+	margin-top:50px;
+}
+
+#listing h4{
+	color:#a4a6ac;
 }

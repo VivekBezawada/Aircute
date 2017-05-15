@@ -1,0 +1,271 @@
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header" style="margin-top:3vh;">
+      <a class="navbar-brand" href="#"><img src="/images/logo.png"> </a>
+    </div>
+    <ul class="nav navbar-nav navbar-right nav-admin" style="margin-top:7vh;">	
+      <li><a href="#">Welcome <span> {{user}} </span></a></li>
+      <li><a href="/logout">Sign Out</a></li>
+      <li><a href="/cart">Cart</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container" id="admin">
+	<ul class="nav nav-tabs nav-justified">
+	  <li class="active"><a data-toggle="tab" href="#programs">Sales history</a></li>
+	  <li><a data-toggle="tab" href="#master">Master</a></li>
+	  <li><a data-toggle="tab" href="#adminTab">Admin</a></li>
+	  <li><a data-toggle="tab" href="#profile">profile</a></li>
+	  <li><a data-toggle="tab" href="#create">Create program</a></li>
+	  <li><a data-toggle="tab" href="#listPrograms">List of programs</a></li>
+	  <li><a data-toggle="tab" href="#complaints">Complaints</a></li>
+	</ul>
+
+	<div class="tab-content">
+	  <div id="programs" class="tab-pane fade in active">
+	    {{#if programs}}
+    		{{#each listings}}
+    			<div class="row" style="margin-top:50px;">
+    				<div class="col-md-3">
+    					<img src="{{image}}" alt="{{image}}" style="width:200px;height:200px;">
+    				</div>
+
+    				<div class="col-md-7">    					
+    					<div class="row">
+    						<div class="col-md-4">
+    							<h3>{{title}} </h3>
+    						</div>
+
+    						<div class="col-md-6">
+    							<img src="{{mediaOwnerLogo}}" alt="{{mediaOwnerLogo}}" style="width:100px;">
+    						</div>
+    					</div>
+
+						<div class="row" id="listing">
+							<div class="col-md-3">
+								<h4>Est. Reach </h4>
+								<h5> {{estViews}}</h5>
+							</div>
+
+							<div class="col-md-3">
+								<h4>Location </h4>
+								<h5> {{location}}</h5>
+							</div>
+
+							<div class="col-md-3">
+								<h4>Medium </h4>
+								<h5> {{medium}}</h5>
+							</div>
+
+							<div class="col-md-3">
+								<h4>Sold To </h4>
+								<h5> {{soldTo}}</h5>
+							</div>
+    					</div>    					
+    				</div>
+
+    				<div class="col-md-2">
+    					<button type="button" class="btn btn-info" data-toggle="modal" data-target="#viewSelected{{@index}}" style="margin-top:75px;">View</button>
+    				</div>
+    			</div>
+    		{{/each}}
+    	{{else}}
+    		<h2> You do not have any listings or history of sales </h2>
+  		{{/if}}
+	  </div>
+	  <div id="master" class="tab-pane fade">
+	    <h3>MASTER SECTION</h3>
+	    <p>NOT SURE WHAT NEEDS TO BE PRESENT</p>
+	  </div>
+	  <div id="adminTab" class="tab-pane fade">
+	    
+<table class="table table-striped" style="margin:0 auto;">
+    <thead>
+      <tr>
+        <th>USERNAME</th>
+        <th>ACCOUNT STATUS</th>
+        <th>LAST LOGIN</th>
+        <th>PERMISSIONS</th>
+        <th> </th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <td>John</td>
+        <td>Doe</td>
+        <td>john@example.com</td>
+        <td>can edit </td>
+        <td><button class="btn btn-info" style="margin-right:5px;">Edit</button><button class="btn btn-danger">Remove</button></td>
+      </tr>
+    
+    </tbody>
+  </table>
+
+	  </div>
+	  <div id="profile" class="tab-pane fade">
+	    <h3>Profile</h3>
+	    <p>Easy only. SOme form with weird details</p>
+	  </div>
+
+	  <div id="create" class="tab-pane fade">
+	    <ul class="nav nav-pills center-pills nav-justified">
+		  <li class="active"><a data-toggle="pill" href="#createProgram">Create a New Program</a></li>
+		  <li><a data-toggle="pill" href="#specialDeals">Special Deals</a></li>
+		  <li><a data-toggle="pill" href="#lastMinuteDeals">Last Minute Deals</a></li>
+		</ul>
+
+		<div class="tab-content">
+		  <div id="createProgram" class="tab-pane fade in active text-center">
+		  	<h4> Select the media type</h4>
+		  	<div class="dropdown">
+
+              <a type="button" data-toggle="dropdown">
+                <span>  Select from the list</span><span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu text-center">
+                <li><a href="#">Television</a></li>
+                <li><a href="#">OutDoor</a></li>
+                <li><a href="#">Radio</a></li>
+                <li><a href="#">Internet Media</a></li>
+              </ul>
+            </div>  
+		  
+		  </div>
+		  <div id="specialDeals" class="tab-pane fade in active  text-center">
+		  	<h4> Select the media type</h4>
+		  	<div class="dropdown">
+
+              <a type="button" data-toggle="dropdown">
+                <span>  Select from the list</span><span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu  text-center">
+                <li><a href="#">Television</a></li>
+                <li><a href="#">OutDoor</a></li>
+                <li><a href="#">Radio</a></li>
+                <li><a href="#">Internet Media</a></li>
+              </ul>
+            </div>  
+		  </div>
+		  <div id="lastMinuteDeals" class="tab-pane fade in active text-center">
+		  	<h4> Select the media type</h4>
+		  	<div class="dropdown">
+
+              <a type="button" data-toggle="dropdown">
+                <span>  Select from the list</span><span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu  text-center">
+                <li><a href="#">Television</a></li>
+                <li><a href="#">OutDoor</a></li>
+                <li><a href="#">Radio</a></li>
+                <li><a href="#">Internet Media</a></li>
+              </ul>
+            </div>  	
+		  </div>
+		</div>
+
+	  </div>
+	  <div id="listPrograms" class="tab-pane fade">
+	     {{#if programs}}
+    		{{#each listings}}
+    			<div class="row" style="margin-top:50px;">
+    				<div class="col-md-3">
+    					<img src="{{image}}" alt="{{image}}" style="width:200px;height:200px;">
+    				</div>
+
+    				<div class="col-md-7">    					
+    					<div class="row">
+    						<div class="col-md-4">
+    							<h3>{{title}} </h3>
+    						</div>
+
+    						<div class="col-md-6">
+    							<img src="{{mediaOwnerLogo}}" alt="{{mediaOwnerLogo}}" style="width:100px;">
+    						</div>
+    					</div>
+
+						<div class="row" id="listing">
+							<div class="col-md-3">
+								<h4>Est. Reach </h4>
+								<h5> {{estViews}}</h5>
+							</div>
+
+							<div class="col-md-3">
+								<h4>Location </h4>
+								<h5> {{location}}</h5>
+							</div>
+
+							<div class="col-md-3">
+								<h4>Medium </h4>
+								<h5> {{medium}}</h5>
+							</div>
+
+							<div class="col-md-3">
+								<h4>Requested By </h4>
+								<h5> {{soldTo}}</h5>
+							</div>
+    					</div>    					
+    				</div>
+
+    				<div class="col-md-2">
+    					<button type="button" class="btn btn-info btn-wide" data-toggle="modal" data-target="#viewSelected{{@index}}" style="margin-top:75px;">View</button>
+    					<button type="button" class="btn btn-danger btn-wide" data-toggle="modal" data-target="#viewSelected{{@index}}" style="margin-top:75px;">Delete</button>
+    					<button type="button" class="btn btn-primary btn-wide" data-toggle="modal" data-target="#viewSelected{{@index}}" style="margin-top:75px;">Approve/Reject</button>
+    				</div>
+    			</div>
+    		{{/each}}
+    	{{else}}
+    		<h2> You do not have any listings </h2>
+  		{{/if}}
+	  </div>
+	  <div id="complaints" class="tab-pane fade">
+	    <h3>Complaints</h3>
+	    <p>There are no complaints</p>
+	  </div>
+	</div>
+</div>
+
+<!-- View a sold item-->
+<div class="modal fade" id="viewSelected0" role="dialog">
+ <div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <h4 class="modal-title">Modal Header</h4>
+    </div>
+    <div class="modal-body" id="dynamicModalSaleHistory">
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+  </div>
+ </div>
+</div>
+
+<!-- Add user Modal -->
+<div class="modal fade" id="addNewUser" role="dialog">
+ <div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <h4 class="modal-title">Add User Form</h4>
+    </div>
+    <div class="modal-body" id="dynamicModalSaleHistory">
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+  </div>
+ </div>
+</div>
+<script>
+	var ele = document.getElementById('dynamicModalSaleHistory');
+	
+	/////////////////////////////////////////////////////////
+	//////// MAKE AN AJAX CALL AND PULL THE DATA ////////////
+	/////////////////////////////////////////////////////////
+	
+	ele.innerHTML = '<p> this is a dynamic one </p>';
+</script>

@@ -9,9 +9,17 @@
   "author": "epskip",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.1",
+    "cookie-parser": "^1.4.3",
     "express": "^4.15.2",
+    "express-session": "^1.15.2",
     "hbs": "^4.0.1",
-    "mongodb": "^2.2.25"
+    "method-override": "^2.3.8",
+    "mongodb": "^2.2.25",
+    "morgan": "^1.8.1",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "q": "^1.5.0"
   }
 }
