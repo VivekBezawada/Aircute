@@ -266,7 +266,7 @@ app.get('/listing/:id', function(req,res){
 
 app.get('/admin',ensureAuthenticated, function(req,res){
 
-	res.json("status":"logged in", 'page':"admin UI will come");
+	res.json({"status":"logged in", 'page':"admin UI will come"});
 	/*
 	var passData = {title:"Admin Panel | Aircute", "layout":"layouts/admin", "user":req.user.mediaName};
 	var listings = []
