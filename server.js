@@ -265,12 +265,15 @@ app.get('/listing/:id', function(req,res){
 /////////////////////////////////////////
 
 app.get('/admin',ensureAuthenticated, function(req,res){
+
+	res.json("status":"logged in", 'page':"admin UI will come");
+	/*
 	var passData = {title:"Admin Panel | Aircute", "layout":"layouts/admin", "user":req.user.mediaName};
 	var listings = []
 
 	db.collection('listings').find({"mediaOwnerUserName":req.user.username}).toArray(function(err,result){
 		if(result.length == undefined || result.length == 0) {
-			res.render('admin', passData);	
+			res.render('admin', passData);
 		}
 		else {
 			for(var i=0;i<result.length;i++) {
@@ -296,6 +299,7 @@ app.get('/admin',ensureAuthenticated, function(req,res){
 
 		
 	})
+	*/
 })
 
 app.get('/adminAjax',ensureAuthenticated,function(req,res){
