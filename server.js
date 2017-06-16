@@ -130,7 +130,8 @@ app.listen(80,function(){
 //0. HomePage
 
 app.get('/', function(req,res){
-	res.render('homepage', { layout:'layouts/admin', title: 'Home Page | Aircute'});
+	res.json({"status":"success","load Page": "Home Page"})
+	//res.render('homepage', { layout:'layouts/admin', title: 'Home Page | Aircute'});
 })
 
 ////////////////////////////////////////////
