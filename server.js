@@ -274,7 +274,10 @@ app.get('/listing/:id', function(req,res){
 
 app.get('/admin',ensureAuthenticated, function(req,res){
 
-	res.json({"userTitle":req.user.mediaName,"medias":[],"schedules":[],"complaints":[],"users":[]});
+	db.collection('mediaOwners').find({userName:"startworld"}).toArray(function(err,results){
+
+		res.json(results[0])
+	})
 	/*
 	var passData = {title:"Admin Panel | Aircute", "layout":"layouts/admin", "user":req.user.mediaName};
 	var listings = []
