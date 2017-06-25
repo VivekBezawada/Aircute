@@ -63,7 +63,7 @@ exports.localAuth = function (username, password) {
         if (null == result) {
           console.log("USERNAME NOT FOUND:", username);
 
-          deferred.resolve(false);
+          deferred.resolve(result);
         }
         else {
           var hash = result.password;
@@ -74,7 +74,7 @@ exports.localAuth = function (username, password) {
             deferred.resolve(result);
           } else {
             console.log("AUTHENTICATION FAILED");
-            deferred.resolve(false);
+            deferred.resolve(result);
           }
         }
 

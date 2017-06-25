@@ -10,17 +10,18 @@ var express = require('express'),
 	path = require('path');
 
 
-var config = require('./config.js'), 
+var config = require('./config.js'),
     funct = require('./functions/authentication.js');
 
 var dbConnection =config.mongodbUrl;
 
 var app = express();
 
+
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   req.session.error = 'Please sign in!';
-  res.redirect('/signinMediaOwner');
+  res.json({"httpStatus":403,"data":null});
 }
 
 //===============PASSPORT===============
@@ -49,7 +50,9 @@ passport.use('signinMediaOwner', new LocalStrategy(
       }
       if (!user) {
         console.log("COULD NOT LOG IN");
-        req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
+        req.session.error = 'Could not log user in. Please try again.';
+
+         //inform user could not log them in
         done(null, user);
       }
     })
@@ -129,37 +132,23 @@ app.listen(80,function(){
 	MongoClient.connect(dbConnection, function(err, database) {
 		db = database
 	  if(!err) {
-			console.log("Database is COnnected and Application is running...")    
+		console.log("Connected...")    
 	  }
 	});
-})
-
-//0. HomePage
-
-app.get('/', function(req,res){
-	res.json({"status":"success","load Page": "Home Page"})
-	//res.render('homepage', { layout:'layouts/admin', title: 'Home Page | Aircute'});
 })
 
 ////////////////////////////////////////////
 ////////////// AUTHENTTICATION /////////////
 ////////////////////////////////////////////
 
-app.get('/signup', function(req,res){
-	res.render('signup', { layout:null, title: 'Signup | Aircute'});
-})
-
-//GET Request - Signup for the Client
-app.get('/signUpMediaOwner', function(req,res){
-	res.render('signupMedia', { layout:null, title: 'Signup Media Owners | Aircute'});
-})
-
 // POST Request - Signup for the Client
-app.post('/signUpMediaOwner', passport.authenticate('signupMediaOwner', {
-  successRedirect: '/',
-  failureRedirect: '/signUpMediaOwner'
-  })
-);
+app.post('/api/signUp', passport.authenticate('signupMediaOwner'), function(req,res){
+	if(req.user) {
+		res.json({"httpStatus":200,"data":req.user.username})
+	} else {
+		res.json({"httpStatus":501,"data":null})
+	}
+});
 
 
 
@@ -184,32 +173,24 @@ app.post('/signUpUser', function(req,res){
 		res.redirect('/')
 	})
 })
-*/
+
 
 
 // GET Request - Login Media owner
 app.get('/signinMediaOwner', function(req,res){
 	res.render('signinMediaOwner', { layout:null, title: 'Signin as a Media Owner | Aircute'});
 })
+*/
 
 //POST Request - Login Media Owner
-app.post('/signinMediaOwner', passport.authenticate('signinMediaOwner', {
-  successRedirect: '/admin',
-  failureRedirect: '/signinMediaOwner'
-  })
-);
+app.post('/api/auth', passport.authenticate('signinMediaOwner'),function(req,res){
+	if(req.user) {
+		res.json({"httpStatus":200,"data":req.user});
+	} else {
+		res.json({"httpStatus":401,"data":null});	
+	}
+});
 
-
-/* function(req,res){
-	console.log(req.body.username)
-	console.log(req.body.password)
-	db.collection('mediaOwners').find({$and: [{"username":req.body.username}, {"password":req.body.password}]}).count(function(err, count){
-		if(count == 1) {
-				res.send("YOU ARE NOW LOGGED IN AS " + req.body.username + ". Please come back later for the admin panel")
-			}
-	})
-})
-*/
 
 /* USER MODE OFF 
 app.get('/signinUser', function(req,res){
@@ -225,12 +206,12 @@ app.post('/signinUser', function(req,res){
 	})
 })
 */
-app.get('/logout', function(req, res){
+app.get('/api/auth/logout', function(req, res){
   var name = req.user.username;
   console.log("LOGGING OUT " + req.user.username)
   req.logout();
-  res.redirect('/');
   req.session.notice = "You have successfully been logged out " + name + "!";
+  res.json({"httpStatus":200, "data":null})
 });
 
 ///////////////////////////////////////
@@ -313,6 +294,187 @@ app.get('/admin',ensureAuthenticated, function(req,res){
 	*/
 })
 
-app.get('/adminAjax',ensureAuthenticated,function(req,res){
+/////////////////////////////////////////
+////////////////  MEDIA  ////////////////
+/////////////////////////////////////////
 
+
+app.get('/api/media',ensureAuthenticated, function(req,res){
+	db.collection('media').find({"createdBy":req.user.username}).toArray(function(err,results){
+		if(err) {
+			console.log(Err)
+			res.json({"httpStatus":404, "data":null})
+		}
+		else if(results.length !=0) {
+			res.json({"httpStatus":200, "data":results})
+		}
+		else {
+			res.json({"httpStatus":404, "data":null})
+		}
+	})
+})
+
+
+app.get('/api/media/:handler',ensureAuthenticated, function(req,res){
+	db.collection('media').find({$and: [{"createdBy":req.user.username},{"handler":req.params.handler}]}).toArray(function(err,results){
+		if(err) {
+			console.log(Err)
+			res.json({"httpStatus":404, "data":null})
+		}
+		else if(results.length ==1) {
+			res.json({"httpStatus":200, "data":results[0]})
+		}
+		else {
+			res.json({"httpStatus":404, "data":null})
+		}
+	})
+})
+
+app.post('/api/media',ensureAuthenticated, function(req,res){
+	var data = req.body
+	data.handler = data.title.replace(/[^a-zA-Z0-9]/g, '-');
+	data.createdBy = req.user.username;
+	data.createdAt = new Date();
+
+	db.collection('media').insert(data, function(err,resul){
+		if(!err){
+			res.json({"httpStatus":200,"data":data.handler})
+		} else {
+			res.json({"httpStatus":500,"data":data.handler})
+		}
+	})
+})
+
+app.put('/api/media/:handler', ensureAuthenticated, function(req,res){
+	var data = req.body
+	if(data.title) {
+		req.body.handler = data.title.replace(/[^a-zA-Z0-9]/g, '-');
+	}
+	db.collection('media').update({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]},{$set:req.body}, function(err,results){
+		if(!err && results.result.n ==1){
+			res.json({"httpStatus":200,"data":req.body.handler || req.params.handler});
+		} else if(results.result.n ==0){
+			res.json({"httpStatus":404,"data":req.params.handler})
+		} else {
+			res.json({"httpStatus":500,"data":req.params.handler})
+		}
+		
+	})
+})
+
+app.delete('/api/media/:handler',ensureAuthenticated, function(req,res){
+	db.collection('media').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
+		if(!err && results.result.n ==1){
+			res.json({"httpStatus":200,"data":req.params.handler});
+		} else if(results.result.n ==0){
+			res.json({"httpStatus":404,"data":req.params.handler})
+		} else {
+			res.json({"httpStatus":500,"data":req.params.handler})
+		}
+	})
+})
+
+/////////////////////////////////////////
+//////////////  SCHEDULES  //////////////
+/////////////////////////////////////////
+
+
+app.get('/api/schedule',ensureAuthenticated, function(req,res){
+	var arr = []
+	var sch = {}
+	var count = 0;
+	db.collection('schedules').find({"createdBy":req.user.username}).toArray(function(err,results){
+		if(results == null) {
+			res.json({"httpStatus":404, "data":null})
+		} else if(err) {
+			console.log(Err)
+			res.json({"httpStatus":500, "data":null})
+		} else {
+			count = results.length
+			for(var i=0;i<results.length;i++) {
+				sch = results[i]
+				db.collection('media').find({$and : [{"handler":results[i].mediaHandler},{"createdBy":req.user.username}]}).toArray(function(err,resul){
+					if(!err){
+						if(resul != undefined) {
+							sch.media = resul[0]
+						} else {
+							sch.media = {}
+						}
+						arr.push(sch)
+						count--;
+						if(count==0) {
+							res.json({"httpStatus":200,"data":arr});
+						}
+					}
+				})
+			}
+		}
+	})
+})
+
+
+app.get('/api/schedule/:handler',ensureAuthenticated, function(req,res){
+	db.collection('schedules').find({$and: [{"createdBy":req.user.username},{"handler":req.params.handler}]}).toArray(function(err,results){
+		if(err) {
+			console.log(Err)
+			res.json({"httpStatus":500, "data":null})
+		}
+		else if(results.length ==1) {
+			sch = results[0]
+			db.collection('media').find({$and : [{"handler":results[0].mediaHandler},{"createdBy":req.user.username}]}).toArray(function(err,resul){
+				if(resul != undefined) {
+					sch.media = resul[0]
+				} else {
+					sch.media = {}
+				}
+				res.json({"httpStatus":200, "data":sch})
+			})
+		}
+		else {
+			res.json({"httpStatus":404, "data":req.params.handler})
+		}
+	})
+})
+
+app.post('/api/schedule',ensureAuthenticated, function(req,res){
+	var data = req.body
+	data.handler = data.title.replace(/[^a-zA-Z0-9]/g, '-');
+	data.createdBy = req.user.username;
+	data.createdAt = new Date();
+	db.collection('schedules').insert(data, function(err,resul){
+		if(!err){
+			res.json({"httpStatus":200,"data":data.handler})
+		} else {
+			res.json({"httpStatus":500,"data":data.handler})
+		}
+	})
+})
+
+app.put('/api/schedule/:handler', ensureAuthenticated, function(req,res){
+	var data = req.body
+	if(data.title) {
+		req.body.handler = data.title.replace(/[^a-zA-Z0-9]/g, '-');
+	}
+	db.collection('schedules').update({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]},{$set:req.body}, function(err,results){
+		if(!err && results.result.n ==1){
+			res.json({"httpStatus":200,"data":req.body.handler || req.params.handler});
+		} else if(results.result.n ==0){
+			res.json({"httpStatus":404,"data":req.params.handler})
+		} else {
+			res.json({"httpStatus":500,"data":req.params.handler})
+		}
+		
+	})
+})
+
+app.delete('/api/schedule/:handler',ensureAuthenticated, function(req,res){
+	db.collection('schedule').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
+		if(!err && results.result.n ==1){
+			res.json({"httpStatus":200,"data":req.params.handler});
+		} else if(results.result.n ==0){
+			res.json({"httpStatus":404,"data":req.params.handler})
+		} else {
+			res.json({"httpStatus":500,"data":req.params.handler})
+		}
+	})
 })
