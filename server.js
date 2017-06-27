@@ -224,16 +224,16 @@ app.get('/api/auth/logout', function(req, res){
 /////////////  LISTINGS  //////////////
 ///////////////////////////////////////
 
-app.get('/api/listing',ensureAuthenticated, function(req,res){
+app.get('/api/listing', function(req,res){
 	var arr = []
 	var sch = {}
 	var count = 0;
 	db.collection('schedules').find({}).toArray(function(err,results){
 		if(results == null) {
-			res.json({"httpStatus":404, "data":null})
+			res.status(404).send("No data found");
 		} else if(err) {
 			console.log(Err)
-			res.json({"httpStatus":500, "data":null})
+			res.status(404).send("Please try again");
 		} else {
 			count = results.length
 			for(var i=0;i<results.length;i++) {
@@ -258,7 +258,7 @@ app.get('/api/listing',ensureAuthenticated, function(req,res){
 })
 
 
-app.get('/api/listing/:handler',ensureAuthenticated, function(req,res){
+app.get('/api/listing/:handler', function(req,res){
 	db.collection('schedules').find({"handler":req.params.handler}).toArray(function(err,results){
 		if(err) {
 			console.log(err)
@@ -272,6 +272,7 @@ app.get('/api/listing/:handler',ensureAuthenticated, function(req,res){
 				} else {
 					sch.media = {}
 				}
+
 				res.status(200).send({"data":sch});
 			})
 		}
@@ -284,7 +285,9 @@ app.get('/api/listing/:handler',ensureAuthenticated, function(req,res){
 /////////////////////////////////////////
 ////////////////  USERS  ////////////////
 /////////////////////////////////////////
-
+app.get('/api/users', ensureAuthenticated, function(req,res){
+	
+})
 
 
 
@@ -298,13 +301,13 @@ app.get('/api/media',ensureAuthenticated, function(req,res){
 	db.collection('media').find({"createdBy":req.user.username}).toArray(function(err,results){
 		if(err) {
 			console.log(Err)
-			res.json({"httpStatus":404, "data":null})
+			res.status(500).send("Try Again");
 		}
 		else if(results.length !=0) {
-			res.json({"httpStatus":200, "data":results})
+			res.status(200).send({"data":results});
 		}
 		else {
-			res.json({"httpStatus":404, "data":null})
+			res.status(404).send("No data found");
 		}
 	})
 })
@@ -314,13 +317,13 @@ app.get('/api/media/:handler',ensureAuthenticated, function(req,res){
 	db.collection('media').find({$and: [{"createdBy":req.user.username},{"handler":req.params.handler}]}).toArray(function(err,results){
 		if(err) {
 			console.log(Err)
-			res.json({"httpStatus":404, "data":null})
+			res.status(500).send("Try Again");
 		}
 		else if(results.length ==1) {
-			res.json({"httpStatus":200, "data":results[0]})
+			res.status(200).send({"data":results[0]});
 		}
 		else {
-			res.json({"httpStatus":404, "data":null})
+			res.status(404).send("No data found");
 		}
 	})
 })
@@ -333,9 +336,9 @@ app.post('/api/media',ensureAuthenticated, function(req,res){
 
 	db.collection('media').insert(data, function(err,resul){
 		if(!err){
-			res.json({"httpStatus":200,"data":data.handler})
+			res.status(200).send({"data":data.handler});
 		} else {
-			res.json({"httpStatus":500,"data":data.handler})
+			res.status(500).send("Try Again");
 		}
 	})
 })
@@ -347,11 +350,11 @@ app.put('/api/media/:handler', ensureAuthenticated, function(req,res){
 	}
 	db.collection('media').update({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]},{$set:req.body}, function(err,results){
 		if(!err && results.result.n ==1){
-			res.json({"httpStatus":200,"data":req.body.handler || req.params.handler});
+			res.status(200).send({"data":req.body.handler || req.params.handler});
 		} else if(results.result.n ==0){
-			res.json({"httpStatus":404,"data":req.params.handler})
+			res.status(404).send("No data found");
 		} else {
-			res.json({"httpStatus":500,"data":req.params.handler})
+			res.status(500).send("Try Again");
 		}
 		
 	})
@@ -360,11 +363,11 @@ app.put('/api/media/:handler', ensureAuthenticated, function(req,res){
 app.delete('/api/media/:handler',ensureAuthenticated, function(req,res){
 	db.collection('media').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
 		if(!err && results.result.n ==1){
-			res.json({"httpStatus":200,"data":req.params.handler});
+			res.status(200).send({"data":req.params.handler});
 		} else if(results.result.n ==0){
-			res.json({"httpStatus":404,"data":req.params.handler})
+			res.status(404).send("No data found");
 		} else {
-			res.json({"httpStatus":500,"data":req.params.handler})
+			res.status(500).send("Try Again");
 		}
 	})
 })
@@ -380,10 +383,10 @@ app.get('/api/schedule',ensureAuthenticated, function(req,res){
 	var count = 0;
 	db.collection('schedules').find({"createdBy":req.user.username}).toArray(function(err,results){
 		if(results == null) {
-			res.json({"httpStatus":404, "data":null})
+			res.status(404).send("No data found");
 		} else if(err) {
 			console.log(Err)
-			res.json({"httpStatus":500, "data":null})
+			res.status(500).send("Try Again");
 		} else {
 			count = results.length
 			for(var i=0;i<results.length;i++) {
@@ -398,7 +401,7 @@ app.get('/api/schedule',ensureAuthenticated, function(req,res){
 						arr.push(sch)
 						count--;
 						if(count==0) {
-							res.json({"httpStatus":200,"data":arr});
+							res.status(200).send({"data":arr});
 						}
 					}
 				})
@@ -412,7 +415,7 @@ app.get('/api/schedule/:handler',ensureAuthenticated, function(req,res){
 	db.collection('schedules').find({$and: [{"createdBy":req.user.username},{"handler":req.params.handler}]}).toArray(function(err,results){
 		if(err) {
 			console.log(Err)
-			res.json({"httpStatus":500, "data":null})
+			res.status(500).send("Try Again");
 		}
 		else if(results.length ==1) {
 			sch = results[0]
@@ -422,11 +425,11 @@ app.get('/api/schedule/:handler',ensureAuthenticated, function(req,res){
 				} else {
 					sch.media = {}
 				}
-				res.json({"httpStatus":200, "data":sch})
+				res.status(200).send({"data":sch});
 			})
 		}
 		else {
-			res.json({"httpStatus":404, "data":req.params.handler})
+				res.status(404).send("No data found");
 		}
 	})
 })
@@ -438,9 +441,9 @@ app.post('/api/schedule',ensureAuthenticated, function(req,res){
 	data.createdAt = new Date();
 	db.collection('schedules').insert(data, function(err,resul){
 		if(!err){
-			res.json({"httpStatus":200,"data":data.handler})
+			res.status(200).send({"data":data.handler});
 		} else {
-			res.json({"httpStatus":500,"data":data.handler})
+			res.status(500).send("Try Again");
 		}
 	})
 })
@@ -452,11 +455,11 @@ app.put('/api/schedule/:handler', ensureAuthenticated, function(req,res){
 	}
 	db.collection('schedules').update({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]},{$set:req.body}, function(err,results){
 		if(!err && results.result.n ==1){
-			res.json({"httpStatus":200,"data":req.body.handler || req.params.handler});
+			res.status(200).send({"data":req.body.handler || req.params.handler});
 		} else if(results.result.n ==0){
-			res.json({"httpStatus":404,"data":req.params.handler})
+			res.status(404).send("No data found");
 		} else {
-			res.json({"httpStatus":500,"data":req.params.handler})
+			res.status(500).send("Try Again");
 		}
 		
 	})
@@ -465,11 +468,11 @@ app.put('/api/schedule/:handler', ensureAuthenticated, function(req,res){
 app.delete('/api/schedule/:handler',ensureAuthenticated, function(req,res){
 	db.collection('schedule').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
 		if(!err && results.result.n ==1){
-			res.json({"httpStatus":200,"data":req.params.handler});
+			res.status(200).send({"data":req.params.handler});
 		} else if(results.result.n ==0){
-			res.json({"httpStatus":404,"data":req.params.handler})
+			res.status(404).send("No data found");
 		} else {
-			res.json({"httpStatus":500,"data":req.params.handler})
+			res.status(500).send("Try Again");
 		}
 	})
 })
