@@ -21,7 +21,7 @@ var app = express();
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   req.session.error = 'Please sign in!';
-  res.json({"httpStatus":403,"data":null});
+  res.status(403).send("Forbidden");
 }
 
 //===============PASSPORT===============
@@ -144,9 +144,9 @@ app.listen(80,function(){
 // POST Request - Signup for the Client
 app.post('/api/signUp', passport.authenticate('signupMediaOwner'), function(req,res){
 	if(req.user) {
-		res.json({"httpStatus":200,"data":req.user.username})
+		res.status(200).send({"data":req.user.username});
 	} else {
-		res.json({"httpStatus":501,"data":null})
+		res.status(500).send("Try Again");
 	}
 });
 
@@ -185,9 +185,9 @@ app.get('/signinMediaOwner', function(req,res){
 //POST Request - Login Media Owner
 app.post('/api/auth', passport.authenticate('signinMediaOwner'),function(req,res){
 	if(req.user) {
-		res.json({"httpStatus":200,"data":req.user});
+		res.status(200).send({"data":req.user});
 	} else {
-		res.json({"httpStatus":401,"data":null});	
+		res.status(401).send();
 	}
 });
 
@@ -211,7 +211,7 @@ app.get('/api/auth/logout', function(req, res){
   console.log("LOGGING OUT " + req.user.username)
   req.logout();
   req.session.notice = "You have successfully been logged out " + name + "!";
-  res.json({"httpStatus":200, "data":null})
+  res.status(200).send("logged out");
 });
 
 ///////////////////////////////////////
@@ -221,78 +221,73 @@ app.get('/api/auth/logout', function(req, res){
 
 
 ///////////////////////////////////////
-//////////// LISTINGS PAGE ////////////
+/////////////  LISTINGS  //////////////
 ///////////////////////////////////////
 
-app.get('/listing', function(req,res){
-	var passData = {}
-	passData.layout = 'layouts/admin'
-	passData.title =  'Listing | Aircute'
-	
-	db.collection('listings').find().toArray(function(err, result){
-
+app.get('/api/listing', function(req,res){
+	var arr = []
+	var sch = {}
+	var count = 0;
+	db.collection('schedules').find({}).toArray(function(err,results){
+		if(results == null) {
+			res.json({"httpStatus":404, "data":null})
+		} else if(err) {
+			console.log(Err)
+			res.json({"httpStatus":500, "data":null})
+		} else {
+			count = results.length
+			for(var i=0;i<results.length;i++) {
+				sch = results[i]
+				db.collection('media').find({"handler":results[i].mediaHandler}).toArray(function(err,resul){
+					if(!err){
+						if(resul != undefined) {
+							sch.media = resul[0]
+						} else {
+							sch.media = {}
+						}
+						arr.push(sch)
+						count--;
+						if(count==0) {
+							res.status(200).send({"data":arr});
+						}
+					}
+				})
+			}
+		}
 	})
-
-	res.render('listings', passData)
-	// some db operation to get the results
 })
 
-app.get('/listing/:id', function(req,res){
-	// id is a title
-	res.send("DETAILS PAGE")
-})
 
-///////////////////////////////////////
-////////// END LISTINGS PAGE //////////
-///////////////////////////////////////
-
-
-
-
-/////////////////////////////////////////
-//////////////ADMIN PANEL////////////////
-/////////////////////////////////////////
-
-app.get('/admin',ensureAuthenticated, function(req,res){
-
-	db.collection('mediaOwners').find({userName:"startworld"}).toArray(function(err,results){
-
-		res.json(results[0])
-	})
-	/*
-	var passData = {title:"Admin Panel | Aircute", "layout":"layouts/admin", "user":req.user.mediaName};
-	var listings = []
-
-	db.collection('listings').find({"mediaOwnerUserName":req.user.username}).toArray(function(err,result){
-		if(result.length == undefined || result.length == 0) {
-			res.render('admin', passData);
+app.get('/api/listing/:handler', function(req,res){
+	db.collection('schedules').find({"handler":req.params.handler}).toArray(function(err,results){
+		if(err) {
+			console.log(err)
+			res.status(500).send("Try Again");
+		}
+		else if(results.length ==1) {
+			sch = results[0]
+			db.collection('media').find({"handler":results[0].mediaHandler}).toArray(function(err,resul){
+				if(resul != undefined) {
+					sch.media = resul[0]
+				} else {
+					sch.media = {}
+				}
+				res.status(200).send({"data":sch});
+			})
 		}
 		else {
-			for(var i=0;i<result.length;i++) {
-				if(result[i].saleHistory.length != 0) {
-					passData.programs = true;
-					for(var j=0;j<result[i].saleHistory.length;j++) {
-						//
-						result[i].soldTo = "vivek";
-						//
-						listings.push(result[i])
-						//console.log(result[i].saleHistory[j])
-					}
-				}
-				else {
-					passData.programs = false;
-					res.render('admin', passData)
-				}
-			}
-			passData.listings = listings;
-			console.log(passData);
-			res.render('admin', passData);
+			res.status(404).send({"data":req.params.handler});
 		}
-
-		
 	})
-	*/
 })
+
+/////////////////////////////////////////
+////////////////  USERS  ////////////////
+/////////////////////////////////////////
+
+
+
+
 
 /////////////////////////////////////////
 ////////////////  MEDIA  ////////////////

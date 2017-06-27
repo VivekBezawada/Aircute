@@ -74,7 +74,7 @@ exports.localAuth = function (username, password) {
             deferred.resolve(result);
           } else {
             console.log("AUTHENTICATION FAILED");
-            deferred.resolve(result);
+            deferred.resolve(false);
           }
         }
 
