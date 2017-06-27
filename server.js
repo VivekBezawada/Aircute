@@ -224,7 +224,7 @@ app.get('/api/auth/logout', function(req, res){
 /////////////  LISTINGS  //////////////
 ///////////////////////////////////////
 
-app.get('/api/listing', function(req,res){
+app.get('/api/listing',ensureAuthenticated, function(req,res){
 	var arr = []
 	var sch = {}
 	var count = 0;
@@ -258,7 +258,7 @@ app.get('/api/listing', function(req,res){
 })
 
 
-app.get('/api/listing/:handler', function(req,res){
+app.get('/api/listing/:handler',ensureAuthenticated, function(req,res){
 	db.collection('schedules').find({"handler":req.params.handler}).toArray(function(err,results){
 		if(err) {
 			console.log(err)
