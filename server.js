@@ -286,7 +286,16 @@ app.get('/api/listing/:handler', function(req,res){
 ////////////////  USERS  ////////////////
 /////////////////////////////////////////
 
-
+app.get('/api/loggedUser', ensureAuthenticated, function(req,res){
+	db.collection('mediaOwners').find({{"username":req.user.username}}).toArray(function(err,results){
+		if(err) {
+			console.log(Err)
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({data:results[0]});
+		}
+	})
+})
 
 
 /////////////////////////////////////////
