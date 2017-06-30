@@ -287,7 +287,7 @@ app.get('/api/listing/:handler', function(req,res){
 /////////////////////////////////////////
 
 app.get('/api/loggedUser', ensureAuthenticated, function(req,res){
-	db.collection('mediaOwners').find({{"username":req.user.username}}).toArray(function(err,results){
+	db.collection('mediaOwners').find({"username":req.user.username}).toArray(function(err,results){
 		if(err) {
 			console.log(Err)
 			res.status(500).send("Try Again");
