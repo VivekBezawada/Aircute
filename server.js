@@ -91,7 +91,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(methodOverride('X-HTTP-Method-Override'));
-app.use(session({secret: 'aircutesecretcode', saveUninitialized: true, resave: true}));
+app.use(session({secret: 'aircutesecretcode', saveUninitialized: true, resave: true,httpOnly:false,secure:true}));
 app.use(passport.initialize());
 app.use(passport.session());
 
