@@ -363,6 +363,7 @@ app.put('/api/media/:handler', ensureAuthenticated, function(req,res){
 		if(!err && results.result.n ==1){
 			res.status(200).send({"data":req.body.handler || req.params.handler});
 		} else if(err){
+			console.log(err)
 			res.status(500).send("Try Again");
 		} else{
 			res.status(404).send("No data found");
@@ -375,7 +376,7 @@ app.delete('/api/media/:handler',ensureAuthenticated, function(req,res){
 	db.collection('media').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
 		if(!err && results.result.n ==1){
 			res.status(200).send({"data":req.params.handler});
-		} else if(err){
+		} else if(err){console.log(err)
 			res.status(500).send("Try Again");
 		} else{
 			res.status(404).send("No data found");
@@ -468,6 +469,7 @@ app.put('/api/schedule/:handler', ensureAuthenticated, function(req,res){
 		if(!err && results.result.n ==1){
 			res.status(200).send({"data":req.body.handler || req.params.handler});
 		} else if(err){
+			console.log(err)
 			res.status(500).send("Try Again");
 		} else{
 			res.status(404).send("No data found");
@@ -481,6 +483,7 @@ app.delete('/api/schedule/:handler',ensureAuthenticated, function(req,res){
 		if(!err && results.result.n ==1){
 			res.status(200).send({"data":req.params.handler});
 		} else if(err){
+			console.log(err)
 			res.status(500).send("Try Again");
 		} else{
 			res.status(404).send("No data found");
