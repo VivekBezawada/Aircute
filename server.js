@@ -135,7 +135,7 @@ app.listen(80,function(){
 	MongoClient.connect(dbConnection, function(err, database) {
 		db = database
 	  if(!err) {
-		console.log("Connected...")    
+		console.log("Connected...")	
 	  }
 	});
 })
@@ -403,6 +403,12 @@ app.get('/api/schedule',ensureAuthenticated, function(req,res){
 			count = results.length
 			for(var i=0;i<results.length;i++) {
 				sch = results[i]
+				/*
+				sch.programSchedule.startDate = sch.programSchedule.startDate - new Date().getTimezoneOffset()*60*1000
+			sch.programSchedule.endDate = sch.programSchedule.endDate - new Date().getTimezoneOffset()*60*1000
+			sch.programSchedule.startTime = sch.programSchedule.startTime - new Date().getTimezoneOffset()*60*1000
+			sch.programSchedule.endTime = sch.programSchedule.endTime - new Date().getTimezoneOffset()*60*1000
+			*/
 				db.collection('media').find({$and : [{"handler":results[i].mediaHandler},{"createdBy":req.user.username}]}).toArray(function(err,resul){
 					if(!err){
 						if(resul != undefined) {
@@ -431,6 +437,12 @@ app.get('/api/schedule/:handler',ensureAuthenticated, function(req,res){
 		}
 		else if(results.length ==1) {
 			sch = results[0]
+			/*
+			sch.programSchedule.startDate = sch.programSchedule.startDate + new Date().getTimezoneOffset()*60*1000
+			sch.programSchedule.endDate = sch.programSchedule.endDate + new Date().getTimezoneOffset()*60*1000
+			sch.programSchedule.startTime = sch.programSchedule.startTime + new Date().getTimezoneOffset()*60*1000
+			sch.programSchedule.endTime = sch.programSchedule.endTime + new Date().getTimezoneOffset()*60*1000
+			*/
 			db.collection('media').find({$and : [{"handler":results[0].mediaHandler},{"createdBy":req.user.username}]}).toArray(function(err,resul){
 				if(resul != undefined) {
 					sch.media = resul[0]
