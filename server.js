@@ -390,14 +390,21 @@ app.delete('/api/media/:handler',ensureAuthenticated, function(req,res){
 
 
 app.get('/api/schedule',ensureAuthenticated, function(req,res){
-	//{age : {"createdBy":req.user.username,}};
-	var query = {}
+	var query = '{"createdBy":' +req.user.username +',';
+	if(req.query.startDate != null) {
+		query += '"programSchedule.startDate":{$gte:' + parseInt(req.query.startDate);
+	}
+	if(req.query.endDate != null) {
+		query += ',"programSchedule.endDate":{$gte:' + parseInt(req.query.endDate);
+	}
+	query +='}';
+	console.log(query);
 	//console.log(req.query);
 	var arr = []
 	var sch = {}
 	var count = 0;
-	db.collection('schedules').find(query).toArray(function(err,results){
-		if(results == null) {
+	db.collection('schedules').find({"createdBy": req.user.username}).toArray(function(err,results){
+		if(results.length == 0) {
 			res.status(404).send("No data found");
 		} else if(err) {
 			console.log(Err)
@@ -507,7 +514,9 @@ app.put('/api/schedule/:handler', ensureAuthenticated, function(req,res){
 })
 
 app.delete('/api/schedule/:handler',ensureAuthenticated, function(req,res){
-	db.collection('schedule').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
+	console.log(req.params.handler);
+	db.collection('schedules').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
+		//console.log(results);
 		if(!err && results.result.n ==1){
 			res.status(200).send({"data":req.params.handler});
 		} else if(err){
