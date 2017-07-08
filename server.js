@@ -390,10 +390,13 @@ app.delete('/api/media/:handler',ensureAuthenticated, function(req,res){
 
 
 app.get('/api/schedule',ensureAuthenticated, function(req,res){
+	//{age : {"createdBy":req.user.username,}};
+	var query = {}
+	//console.log(req.query);
 	var arr = []
 	var sch = {}
 	var count = 0;
-	db.collection('schedules').find({"createdBy":req.user.username}).toArray(function(err,results){
+	db.collection('schedules').find(query).toArray(function(err,results){
 		if(results == null) {
 			res.status(404).send("No data found");
 		} else if(err) {
@@ -402,31 +405,37 @@ app.get('/api/schedule',ensureAuthenticated, function(req,res){
 		} else {
 			count = results.length
 			for(var i=0;i<results.length;i++) {
-				sch = results[i]
-				/*
+
+				getSchedules(req,results[i],res);
+				function getSchedules(req,obj,res) {
+					db.collection('media').find({$and : [{"handler":obj.mediaHandler},{"createdBy":req.user.username}]}).toArray(function(err,resul){
+						if(!err){
+							sch = obj;
+							if(resul[0] != undefined) {
+								sch['media'] = resul[0]
+							} else {
+								sch['media'] = {}
+							}
+							arr.push(sch)
+							sch = {}
+							count--;
+							if(count==0) {
+								res.status(200).send({"data":arr});
+							}
+						}
+					})
+				}
+			}
+		}
+	})
+})
+
+	/*
 				sch.programSchedule.startDate = sch.programSchedule.startDate - new Date().getTimezoneOffset()*60*1000
 			sch.programSchedule.endDate = sch.programSchedule.endDate - new Date().getTimezoneOffset()*60*1000
 			sch.programSchedule.startTime = sch.programSchedule.startTime - new Date().getTimezoneOffset()*60*1000
 			sch.programSchedule.endTime = sch.programSchedule.endTime - new Date().getTimezoneOffset()*60*1000
 			*/
-				db.collection('media').find({$and : [{"handler":results[i].mediaHandler},{"createdBy":req.user.username}]}).toArray(function(err,resul){
-					if(!err){
-						if(resul != undefined) {
-							sch.media = resul[0]
-						} else {
-							sch.media = {}
-						}
-						arr.push(sch)
-						count--;
-						if(count==0) {
-							res.status(200).send({"data":arr});
-						}
-					}
-				})
-			}
-		}
-	})
-})
 
 
 app.get('/api/schedule/:handler',ensureAuthenticated, function(req,res){
@@ -463,11 +472,18 @@ app.post('/api/schedule',ensureAuthenticated, function(req,res){
 	data.handler = data.title.replace(/[^a-zA-Z0-9]/g, '-');
 	data.createdBy = req.user.username;
 	data.createdAt = new Date();
-	db.collection('schedules').insert(data, function(err,resul){
-		if(!err){
-			res.status(200).send({"data":data.handler});
+	db.collection('schedules').find({"handler":data.handler}).toArray(function(err,results){
+		console.log(results);
+		if(results[0] == null) {
+			db.collection('schedules').insert(data, function(err,resul){
+				if(!err){
+					res.status(200).send({"data":data.handler});
+				} else {
+					res.status(500).send("Try Again");
+				}
+			})
 		} else {
-			res.status(500).send("Try Again");
+			res.status(200).send({"data":null,"status":"Schedule handler already exists"});
 		}
 	})
 })
