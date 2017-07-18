@@ -19,10 +19,24 @@ var app = express();
 
 
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  req.session.error = 'Please sign in!';
-  res.status(403).send("Forbidden");
+	if(req.isAuthenticated()) {
+		if (req.user.role =='admin') {
+			return next(); 
+		}
+	}
+    req.session.error = 'Please sign in!';
+  	res.status(403).send("Forbidden");
 }
+
+function userLogin(req,res,next){
+	if(req.isAuthenticated()) {
+		if (req.user.role == 'user') {
+	  		return next();
+		}
+	}
+	req.session.error = 'Please sign in!';
+	res.status(403).send("Forbidden");
+ }
 
 //===============PASSPORT===============
 // Passport session setup.
@@ -57,11 +71,12 @@ passport.use('signinMediaOwner', new LocalStrategy(
       }
     })
     .fail(function (err){
+
       console.log(err.body);
     });
   }
 ));
-// Use the LocalStrategy within Passport to register/"signup" users.
+// Admin SignUp POST
 passport.use('signupMediaOwner', new LocalStrategy(
   {passReqToCallback : true}, //allows us to pass back the request to the callback
   function(req, username, password, done) {
@@ -83,6 +98,31 @@ passport.use('signupMediaOwner', new LocalStrategy(
     });
   }
 ));
+
+
+// User SignUp POST
+passport.use('signupUser', new LocalStrategy(
+  {passReqToCallback : true}, //allows us to pass back the request to the callback
+  function(req, username, password, done) {
+    funct.signupUser(username, password, req.body.email,req.body.name,req.body.mobileNumber,req.body.imageUrl,req.body.city,req.body.country,req.body.pinCode)
+    .then(function (user) {
+      if (user) {
+        console.log("REGISTERED: " + user.username);
+        req.session.success = 'You are successfully registered and logged in ' + user.username + '!';
+        done(null, user);
+      }
+      if (!user) {
+        console.log("COULD NOT REGISTER");
+        req.session.error = 'That username is already in use, please try a different one.'; //inform user could not log them in
+        done(null, user);
+      }
+    })
+    .fail(function (err){
+      console.log(err.body);
+    });
+  }
+));
+
 
 
 // view engine setup
@@ -144,7 +184,7 @@ app.listen(80,function(){
 ////////////// AUTHENTTICATION /////////////
 ////////////////////////////////////////////
 
-// POST Request - Signup for the Client
+// POST Request - Signup ADMIN
 app.post('/api/signUp', passport.authenticate('signupMediaOwner'), function(req,res){
 	if(req.user) {
 		res.status(200).send({"data":req.user.username});
@@ -153,39 +193,16 @@ app.post('/api/signUp', passport.authenticate('signupMediaOwner'), function(req,
 	}
 });
 
+// POST Request - Signup USER
+app.post('/api/usr/signUp', passport.authenticate('signupUser'), function(req,res){
+	if(req.user) {
+		res.status(200).send({"data":req.user.username});
+	} else {
+		res.status(500).send("Try Again");
+	}
+});
 
-
-/*
-	, function(req,res){
-	var mediaLogo = '/logo/'
-	var register = {"TimeStamp": new Date(),"mediaName":req.body.mediaName, "phoneNumber":req.body.phoneNumber, "emailAddress":req.body.emailAddress, "address":req.body.address, "username":req.body.username, "password":req.body.password, "mediaLogo":req.body.mediaLogo}
-	db.collection('mediaOwners').insert(register, {w:1}, function(err,result){
-		res.redirect('/')
-	})
-})
-*/
-
-/* USER MODE OFF
-app.get('/signUpUser', function(req,res){
-	res.render('signupUser', { layout:null, title: 'Signup | Aircute'});
-})
-
-app.post('/signUpUser', function(req,res){
-	var register = {"TimeStamp": new Date(),"username":req.body.username, "password":req.body.password, "emailAddress":req.body.emailAddress}
-	db.collection('users').insert(register, {w:1}, function(err,result){
-		res.redirect('/')
-	})
-})
-
-
-
-// GET Request - Login Media owner
-app.get('/signinMediaOwner', function(req,res){
-	res.render('signinMediaOwner', { layout:null, title: 'Signin as a Media Owner | Aircute'});
-})
-*/
-
-//POST Request - Login Media Owner
+//POST Request - Login Media Owner or User
 app.post('/api/auth', passport.authenticate('signinMediaOwner'),function(req,res){
 	if(req.user) {
 		res.status(200).send({"data":req.user});
@@ -195,20 +212,7 @@ app.post('/api/auth', passport.authenticate('signinMediaOwner'),function(req,res
 });
 
 
-/* USER MODE OFF 
-app.get('/signinUser', function(req,res){
-	res.render('signinUser', { layout:null, title: 'Signin as a User | Aircute'});
-})
 
-POST Request - Login Media Owner
-app.post('/signinUser', function(req,res){
-	db.collection('users').find({$and: [{"userName":userName}, {"password":password}]}).count(function(err, count){
-		if(count == 1) {
-				res.send("YOU ARE NOW LOGGED IN AS A USER")
-			}
-	})
-})
-*/
 app.get('/api/auth/logout', function(req, res){
 	if(req.user) {
 		var name = req.user.username;
@@ -292,6 +296,17 @@ app.get('/api/listing/:handler', function(req,res){
 /////////////////////////////////////////
 
 app.get('/api/loggedUser', ensureAuthenticated, function(req,res){
+	db.collection('mediaOwners').find({"username":req.user.username}).toArray(function(err,results){
+		if(err) {
+			console.log(Err)
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({data:results[0]});
+		}
+	})
+})
+
+app.get('/api/usr/loggedUser', userLogin, function(req,res){
 	db.collection('mediaOwners').find({"username":req.user.username}).toArray(function(err,results){
 		if(err) {
 			console.log(Err)
@@ -398,7 +413,7 @@ app.get('/api/schedule',ensureAuthenticated, function(req,res){
 		query += ',"programSchedule.endDate":{$gte:' + parseInt(req.query.endDate);
 	}
 	query +='}';
-	console.log(query);
+	//console.log(query);
 	//console.log(req.query);
 	var arr = []
 	var sch = {}
@@ -514,7 +529,6 @@ app.put('/api/schedule/:handler', ensureAuthenticated, function(req,res){
 })
 
 app.delete('/api/schedule/:handler',ensureAuthenticated, function(req,res){
-	console.log(req.params.handler);
 	db.collection('schedules').remove({$and : [{"handler":req.params.handler},{"createdBy":req.user.username}]}, function(err,results){
 		//console.log(results);
 		if(!err && results.result.n ==1){
@@ -524,6 +538,89 @@ app.delete('/api/schedule/:handler',ensureAuthenticated, function(req,res){
 			res.status(500).send("Try Again");
 		} else{
 			res.status(404).send("No data found");
+		}
+	})
+})
+
+
+
+
+/////////////////////////////////////////
+/////////////  USER RELATED  ////////////
+/////////////////////////////////////////
+
+
+app.get('/api/usr/allDetails', userLogin, function(req,res){
+	db.collection('mediaOwners').find({"username":req.user.username}).toArray(function(err,results){
+		if(!err) {
+			if(results[0] != null) {
+				res.status(200).send({"data":results[0]});	
+			}else {
+				res.status(404).send("No data found");
+			}
+		} else {
+			console.log(err)
+			res.status(500).send("Try Again");
+		}
+	})
+})
+
+app.post('/api/usr/purchase',userLogin, function(req,res){
+	db.collection('mediaOwners').update({"username":req.user.username},{$push :{purchases : {"title":req.body.title}}}, function(err,results){
+		if(err) {
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({"data":req.body.title});
+		}
+	})
+})
+
+app.post('/api/usr/wishlist',userLogin, function(req,res){
+	db.collection('mediaOwners').update({"username":req.user.username},{$push :{wishlist : {"title":req.body.title}}}, function(err,results){
+		if(err) {
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({"data":req.body.title});
+		}
+	})
+})
+
+app.post('/api/usr/complaint',userLogin, function(req,res){
+	db.collection('mediaOwners').update({"username":req.user.username},{$push :{complaint : {"id":req.body.id}}}, function(err,results){
+		if(err) {
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({"data":req.body.id});
+		}
+	})
+})
+
+app.post('/api/usr/cart',userLogin, function(req,res){
+	db.collection('mediaOwners').update({"username":req.user.username},{$push :{cart : {"title":req.body.title}}}, function(err,results){
+		if(err) {
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({"data":req.body.title});
+		}
+	})
+})
+
+app.delete('/api/usr/wishlist/:title',userLogin, function(req,res){
+	db.collection('mediaOwners').update({"username":req.user.username},{$pull: {wishlist : {"title":req.params.title}}}, function(err,results){
+		if(err) {
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({"data":req.params.title});
+		}
+	})
+})
+
+app.delete('/api/usr/cart/:title',userLogin, function(req,res){
+	db.collection('mediaOwners').update({"username":req.user.username},{$pull: {cart : {"title":req.params.title}}}, function(err,results){
+		if(err) {
+			res.status(500).send("Try Again");
+		} else {
+			res.status(200).send({"data":req.params.title});
 		}
 	})
 })

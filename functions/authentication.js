@@ -6,7 +6,7 @@ var bcrypt = require('bcryptjs'),
 var mongodbUrl = config.mongodbUrl
 var MongoClient = require('mongodb').MongoClient
 
-//used in local-signup strategy
+// Creating Admin Profile POST
 exports.signupMediaOwner = function (username, password, emailAddress, mediaName, phoneNumber, address, mediaLogo) {
   var deferred = Q.defer();
 
@@ -30,7 +30,56 @@ exports.signupMediaOwner = function (username, password, emailAddress, mediaName
             "mediaName" :mediaName,
             "phoneNumber":phoneNumber,
             "address" : address,
-            "mediaLogo" : mediaLogo
+            "mediaLogo" : mediaLogo,
+            "role" : 'admin'
+          }
+
+          console.log("CREATING USER:", username);
+
+          collection.insert(user)
+            .then(function () {
+              db.close();
+              deferred.resolve(user);
+            });
+        }
+      });
+  });
+
+  return deferred.promise;
+};
+
+// Creating user POST
+exports.signupUser = function (username, password, email, name, mobileNumber, imageUrl,city,country,pinCode) {
+  var deferred = Q.defer();
+
+  MongoClient.connect(mongodbUrl, function (err, db) {
+    var collection = db.collection('mediaOwners');
+
+    //check if username is already assigned in our database
+    collection.findOne({'username' : username})
+      .then(function (result) {
+        if (null != result) {
+          console.log("USERNAME ALREADY EXISTS:", result.username);
+          deferred.resolve(false); // username exists
+        }
+        else  {
+          var hash = bcrypt.hashSync(password, 8);
+          var user = {
+            "TimeStamp" : new Date(),
+            "username": username,
+            "password": hash,
+            "emailAddress" : email,
+            "name" :name,
+            "phoneNumber":mobileNumber,
+            "city":city,
+            "country" : country,
+            "pinCode" :pinCode,
+            "imageUrl" : imageUrl,
+            "role" : 'user',
+            "purchases" :[],
+            "wishlist" : [],
+            "cart" : [],
+            "complaint" : []
           }
 
           console.log("CREATING USER:", username);
