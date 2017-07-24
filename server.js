@@ -236,8 +236,21 @@ app.get('/api/auth/logout', function(req, res){
 app.get('/api/listing', function(req,res){
 	var arr = []
 	var sch = {}
+	var query = {}
 	var count = 0;
-	db.collection('schedules').find(query).toArray(function(err,results){
+	var size = 10;
+	var skip = 0;
+	if(req.query.size) {
+		var size = req.query.length
+	}
+	if(req.query.skip) {
+		var skip = (req.query.page -1)*size
+	}
+	if(req.query.liveCamera) {
+		
+	}
+
+	db.collection('schedules').find(query,{"limit":size,"skip":skip}).toArray(function(err,results){
 		if(results.length == 0) {
 			res.status(404).send("No data found");
 		} else if(err) {
