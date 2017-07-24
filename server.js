@@ -237,30 +237,35 @@ app.get('/api/listing', function(req,res){
 	var arr = []
 	var sch = {}
 	var count = 0;
-	db.collection('schedules').find({}).toArray(function(err,results){
-		if(results == null) {
+	db.collection('schedules').find(query).toArray(function(err,results){
+		if(results.length == 0) {
 			res.status(404).send("No data found");
 		} else if(err) {
 			console.log(Err)
-			res.status(404).send("Please try again");
+			res.status(500).send("Try Again");
 		} else {
 			count = results.length
 			for(var i=0;i<results.length;i++) {
-				sch = results[i]
-				db.collection('media').find({"handler":results[i].mediaHandler}).toArray(function(err,resul){
-					if(!err){
-						if(resul != undefined) {
-							sch.media = resul[0]
-						} else {
-							sch.media = {}
+
+				getSchedules(req,results[i],res);
+				function getSchedules(req,obj,res) {
+					db.collection('media').find({"handler":obj.mediaHandler}).toArray(function(err,resul){
+						if(!err){
+							sch = obj;
+							if(resul[0] != undefined) {
+								sch['media'] = resul[0]
+							} else {
+								sch['media'] = {}
+							}
+							arr.push(sch)
+							sch = {}
+							count--;
+							if(count==0) {
+								res.status(200).send({"data":arr});
+							}
 						}
-						arr.push(sch)
-						count--;
-						if(count==0) {
-							res.status(200).send({"data":arr});
-						}
-					}
-				})
+					})
+				}
 			}
 		}
 	})
@@ -410,7 +415,7 @@ app.get('/api/schedule',ensureAuthenticated, function(req,res){
 		query += '"programSchedule.startDate":{$gte:' + parseInt(req.query.startDate);
 	}
 	if(req.query.endDate != null) {
-		query += ',"programSchedule.endDate":{$gte:' + parseInt(req.query.endDate);
+		query += ',"programSchedule.endDate":{$lte:' + parseInt(req.query.endDate);
 	}
 	query +='}';
 	//console.log(query);
