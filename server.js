@@ -180,6 +180,7 @@ app.listen(80,function(){
 	});
 })
 
+
 ////////////////////////////////////////////
 ////////////// AUTHENTTICATION /////////////
 ////////////////////////////////////////////
@@ -246,7 +247,7 @@ app.get('/api/listing', function(req,res){
 	if(req.query.skip) {
 		var skip = (req.query.page -1)*size
 	}
-	if(req.query.liveCamera) {
+	if(req.query.type) {
 		
 	}
 
@@ -642,3 +643,41 @@ app.delete('/api/usr/cart/:title',userLogin, function(req,res){
 		}
 	})
 })
+
+
+// Cart
+app.get('/api/cart', function(req,res){
+	var cartEachTitle = '';
+	var cartItem = []
+	db.collection('mediaOwners').find({"username":req.user.username}).toArray(function(err,results1){
+		var cartTitles = results1[0].cart;
+		var count=cartTitles.length;
+		for(var i=0;i<cartTitles.length;i++) {
+			cartEachTitle = cartTitles[i].title;
+			getCartPrice(cartEachTitle);
+		}
+
+		function getCartPrice(item) {
+			db.collection('schedules').find({"handler":item}).toArray(function(err,result){
+				cartItem.push(result[0]);
+				count--;
+
+				if(count==0) {
+					res.send({"cartItems":cartItem});
+				}
+			})
+		}
+	})
+})
+
+
+app.post('/api/bid',function(req,res){
+	//get user id, schedule handler, bid price
+
+	//add an array bids with bid price and the user name to the specific schedule. 
+})
+
+app.get('/api/bid', function(req,res){
+	//req.query.scheduleTitle -> returns the best bidder name and th ebidder price.
+})
+
