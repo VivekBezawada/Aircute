@@ -663,7 +663,7 @@ app.get('/api/cart', function(req,res){
 				count--;
 
 				if(count==0) {
-					res.send({"cartItems":cartItem});
+					res.status(200).send({"cartItems":cartItem});
 				}
 			})
 		}
@@ -672,12 +672,45 @@ app.get('/api/cart', function(req,res){
 
 
 app.post('/api/bid',function(req,res){
+	console.log(req.body.handler);
+	db.collection('schedules').find({"handler":req.body.handler}).toArray(function(err,results){
+		if(results == null || results.length ==0) {
+			res.status(404).send("No Schedule Found");
+		} else {
+			currentTime = new Date().getTime();
+			if(currentTime > results[0].auction.startDate && currentTime < results[0].auction.endDate) {
+				db.collection('schedules').update({"handler":req.body.handler},{$push:{"bids":{"userId":"test","bidPrice":req.body.bidPrice}}},function(err,result){
+					if(err) {
+						res.status(500).send("Please try again");
+					} else {
+						res.status(200).send("Success");
+					}
+				})
+			} else {
+				res.status(200).send("Bids cannot be taken at this time");
+			}
+		}
+	})
 	//get user id, schedule handler, bid price
 
 	//add an array bids with bid price and the user name to the specific schedule. 
 })
 
 app.get('/api/bid', function(req,res){
+	db.collection('schedules').find({"handler":req.query.handler}).toArray(function(err,results){
+		if(results == null || results.length ==0) {
+			res.status(404).send("No Schedule Found");
+		} else {
+			var bidder = results[0].bids
+
+			bidder.sort(function(a,b){
+				return b.bidPrice - a.bidPrice;
+			});
+
+			res.status(200).send(bidder[0]);
+
+		}
+	})
 	//req.query.scheduleTitle -> returns the best bidder name and th ebidder price.
 })
 
