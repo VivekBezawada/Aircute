@@ -234,10 +234,46 @@ app.get('/api/auth/logout', function(req, res){
 /////////////  LISTINGS  //////////////
 ///////////////////////////////////////
 
+
 app.get('/api/listing', function(req,res){
+
+	var query={};
+	var demographic = {}
+	if(req.query.type) {
+		query.type = req.query.type;
+	}
+	if(req.query.liveCamera) {
+		query.liveCamera = (req.query.liveCamera == 'true');
+	}
+	if(req.query.genre) {
+		query.genre = req.query.genre;
+	}
+	if(req.query.accolades) {
+		query.accolades = req.query.accolades;
+	}
+	if(req.query.cast) {
+		query.cast = req.query.cast;
+	}
+
+	if(req.query.budgetMin && req.query.budgetMax) {
+		var estReach = '{ "$gte": '+ req.query.budgetMin+', "$lte": ' + req.query.budgetMax + '}';
+		query.estimateReach = JSON.parse(estReach);
+	}
+	if(req.query.priceMin && req.query.priceMax) {
+		var price = '{ "$gte": '+ req.query.priceMin+', "$lte": ' + req.query.priceMax + '}';
+		query.price = JSON.parse(price);
+	}
+	if(req.query.ageMin && req.query.ageMax) {
+		query["demographic.minAge"] = JSON.parse('{ "$gte":'+ req.query.ageMin +'}');
+		query["demographic.maxAge"] = JSON.parse('{ "$lte":'+ req.query.ageMax +'}');
+	}
+	if(req.query.incomeMin && req.query.incomeMax) {
+		query["demographic.minIncomePerAnnum"] = JSON.parse('{ "$gte":'+ req.query.incomeMin +'}');
+		query["demographic.maxIncomePerAnnum"] = JSON.parse('{ "$lte":'+ req.query.incomeMax +'}');
+	}
+	
 	var arr = []
 	var sch = {}
-	var query = {}
 	var count = 0;
 	var size = 10;
 	var skip = 0;
@@ -247,15 +283,15 @@ app.get('/api/listing', function(req,res){
 	if(req.query.skip) {
 		var skip = (req.query.page -1)*size
 	}
-	if(req.query.type) {
-		
-	}
-
+	console.log(query)
 	db.collection('schedules').find(query,{"limit":size,"skip":skip}).toArray(function(err,results){
+		
+	console.log(results.length);
+
 		if(results.length == 0) {
 			res.status(404).send("No data found");
 		} else if(err) {
-			console.log(Err)
+			console.log(err)
 			res.status(500).send("Try Again");
 		} else {
 			count = results.length
@@ -282,7 +318,9 @@ app.get('/api/listing', function(req,res){
 				}
 			}
 		}
+
 	})
+	
 })
 
 
@@ -649,6 +687,9 @@ app.delete('/api/usr/cart/:title',userLogin, function(req,res){
 app.get('/api/cart', function(req,res){
 	var cartEachTitle = '';
 	var cartItem = []
+	var arr = []
+	var sch = {}
+	var counter = 0;
 	db.collection('mediaOwners').find({"username":req.user.username}).toArray(function(err,results1){
 		var cartTitles = results1[0].cart;
 		var count=cartTitles.length;
@@ -658,12 +699,36 @@ app.get('/api/cart', function(req,res){
 		}
 
 		function getCartPrice(item) {
-			db.collection('schedules').find({"handler":item}).toArray(function(err,result){
-				cartItem.push(result[0]);
-				count--;
+			db.collection('schedules').find({"createdBy": req.user.username}).toArray(function(err,results){
+				if(results.length == 0) {
+					res.status(404).send("No data found");
+				} else if(err) {
+					console.log(Err)
+					res.status(500).send("Try Again");
+				} else {
+					counter = results.length
+					for(var i=0;i<results.length;i++) {
 
-				if(count==0) {
-					res.status(200).send({"cartItems":cartItem});
+						getSchedules(req,results[i],res);
+						function getSchedules(req,obj,res) {
+							db.collection('media').find({$and : [{"handler":obj.mediaHandler},{"createdBy":req.user.username}]}).toArray(function(err,resul){
+								if(!err){
+									sch = obj;
+									if(resul[0] != undefined) {
+										sch['media'] = resul[0]
+									} else {
+										sch['media'] = {}
+									}
+									arr.push(sch)
+									sch = {}
+									counter--;
+									if(count==0) {
+										res.status(200).send({"data":arr});
+									}
+								}
+							})
+						}
+					}
 				}
 			})
 		}
